@@ -1,0 +1,1 @@
+Practice homework in experimental and statistical analysis. Written in R, contains insights using ANOVA, RCBD, T-Tests, and more.

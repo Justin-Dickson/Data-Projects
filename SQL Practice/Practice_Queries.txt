@@ -1,0 +1,146 @@
+Q1
+SELECT ename
+FROM (
+	SELECT ename, ROW_NUMBER() OVER(ORDER BY ename) + 1 AS rownum 
+	FROM emp
+) t
+WHERE t.rownum % 2 = 0
+limit 10;
+
+
+Q2
+SELECT ename, salary
+FROM emp
+ORDER BY salary desc
+LIMIT 5;				
+
+
+Q3
+SELECT ename, salary, dept
+FROM (SELECT *,
+	  ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary desc) as rownum
+	  FROM emp) t
+WHERE rownum <= 2
+GROUP BY dept, ename, salary
+ORDER BY dept, salary desc
+;
+
+
+Q4
+SELECT ename, salary, dept, avgdept
+FROM (SELECT *,
+	  ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary desc) as rownum,
+	  ROUND(AVG(salary::numeric) OVER(PARTITION BY dept),2) as avgdept
+	  FROM emp) t
+WHERE rownum <= 2
+GROUP BY dept, ename, salary, avgdept
+ORDER BY dept, salary desc
+;
+
+Q5
+SELECT regexp_replace('I love to use advanced SQL', '[aeiou]', '_', 'ig');
+
+
+Q6
+prepare numwords(VARCHAR) AS
+WITH t1 AS (
+	SELECT TRIM(regexp_replace($1, '\s+', ' ', 'g')) AS s1
+), t2 AS (
+	SELECT regexp_split_to_array(t1.s1, ' ') AS s2
+	FROM t1
+), t3 AS (
+	SELECT array_length(t2.s2,1) AS stringlength
+	FROM t2)
+SELECT stringlength
+FROM t3;
+
+EXECUTE numwords('Knowing SQL greatly helps me do my job better in most situations in Mississippi');
+
+
+Q7
+PREPARE sumnum(VARCHAR) AS
+WITH t1 AS (
+	SELECT TRIM(regexp_replace($1, '\s+', ' ', 'g')) AS s1
+), t2 AS (
+	SELECT regexp_replace(t1.s1, '\D', ' ', 'g') AS onlydigits
+	FROM t1
+), t3 AS (
+	SELECT TRIM(regexp_replace(t2.onlydigits, '\s+', ' ', 'g')) AS s1
+	FROM t2
+), t4 AS (
+	SELECT regexp_split_to_array(s1, ' ')::INT[] AS s2
+	FROM t3
+), t5 AS (
+	SELECT sum(unest) AS sumdigits
+	FROM (SELECT UNNEST(t4.s2) as unest FROM t4) t6
+)
+SELECT t5.sumdigits
+FROM t5;
+EXECUTE sumnum('your 2 cents is like 60000 dollars to me')
+
+
+Q8
+WITH streak AS (
+	SELECT ROW_NUMBER() OVER (ORDER BY c1) AS seqnum, c1
+	FROM tt9
+), s2 AS (SELECT (c1 - seqnum) seq, c1 
+		  FROM streak
+), s3 AS (SELECT max(c1) AS n, seq
+FROM s2
+GROUP BY seq
+ORDER BY seq)
+SELECT n AS Max_In_Set
+FROM s3;
+
+
+Q9
+WITH t1 AS(
+	SELECT date_trunc('month',CURRENT_DATE + INTERVAL '2 year') AS futdate
+), t2 AS(
+	SELECT EXTRACT (DOW FROM t1.futdate) AS dow, futdate
+	FROM t1
+)
+SELECT futdate,
+CASE
+	WHEN t2.dow = 0 THEN 'Sunday'
+	WHEN t2.dow = 1 THEN 'Monday'
+	WHEN t2.dow = 2 THEN 'Tuesday'
+	WHEN t2.dow = 3 THEN 'Wednesday'
+	WHEN t2.dow = 4 THEN 'Thursday'
+	WHEN t2.dow = 5 THEN 'Friday'
+	WHEN t2.dow = 6 THEN 'Saturday'
+	END AS Day_Of_Week
+FROM t2;
+
+Q10
+WITH t1 AS(
+	SELECT (date_trunc('year',CURRENT_DATE + INTERVAL '1 year') - INTERVAL '1 day') AS futdate
+), t2 AS(
+	SELECT futdate,
+	EXTRACT (DOW FROM t1.futdate) AS dow, 
+	(date_trunc('year',CURRENT_DATE + INTERVAL '1 year') - date_trunc('year',CURRENT_DATE)) AS numdays
+	FROM t1
+)
+SELECT numdays,
+CASE
+	WHEN t2.dow = 0 THEN 'Sunday'
+	WHEN t2.dow = 1 THEN 'Monday'
+	WHEN t2.dow = 2 THEN 'Tuesday'
+	WHEN t2.dow = 3 THEN 'Wednesday'
+	WHEN t2.dow = 4 THEN 'Thursday'
+	WHEN t2.dow = 5 THEN 'Friday'
+	WHEN t2.dow = 6 THEN 'Saturday'
+	END AS Last_Day_Of_Year
+FROM t2;
+
+
+Q11
+WITH t1 AS (
+	SELECT generate_series(current_date, CURRENT_DATE + INTERVAL '10 year', '1 day'::INTERVAL) AS s1
+), t2 AS (
+	SELECT EXTRACT (MONTH FROM s1) AS s2
+	FROM t1
+)
+SELECT COUNT(*) AS Days_In_February
+FROM t2
+WHERE s2 = 2;
