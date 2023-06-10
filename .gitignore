@@ -1,3 +1,4 @@
-spotify_details.yml
-data_functions.py
-music_data.py
+*.py
+spotify/
+*.pyc
+*.cache
