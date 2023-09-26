@@ -1,0 +1,1 @@
+Chicken disease classification project to be deployed with AWS and Azure
