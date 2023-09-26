@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Name: cnnClassifier
+Version: 0.0.0
+Summary: Small python package for CNN app
+Home-page: https://github.com/Justin-Dickson/Chicken Disease Classification
+Author: Justin-Dickson
+Author-email: jdickson353@gmail.com
+Project-URL: Bug Tracker, https://github.com/Justin-Dickson/Chicken Disease Classification/issues
+
+Chicken disease classification project to be deployed with AWS and Azure
